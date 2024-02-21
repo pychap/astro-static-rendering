@@ -1,0 +1,36 @@
+---
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getCollection(
+    "posts",
+    ({ data }) => data.isDraft === false
+  );
+  return paginate(posts, { pageSize: 2 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+
+const title = `Blog Page`;
+---
+
+<BaseLayout title={title}>
+  <h1>{title}</h1>
+  <ul>
+    {
+      page.data.map((p) => (
+          <li>
+            <a href={`/posts/${p.slug}/`}>Read Post {p.data.title}</a>
+          </li>
+        )
+      )
+    }
+  </ul>
+  <div>
+    {page.url.prev && <a href={page.url.prev}>Previous page</a>}
+    {page.url.next && <a href={page.url.next}>Next page</a>}
+    {page.url.current && <a href={page.url.current}>Current page</a>}
+  </div>
+</BaseLayout>
